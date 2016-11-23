@@ -1,0 +1,92 @@
+INSTALLATION
+=============
+
+1) You will need a copy of the Java Runtime Environment version 1.8+. The exact Java distribution version that ForceGen was generated using is build 1.8.0_60-b27.
+
+2) Download the executable ForceGen JAR from:
+https://github.com/acnash/UCLCollagenGroup/blob/master/ForceConstants.jar
+
+3) Create a directory/folder called "lib" at the same level as the ForceConstants.jar file, e.g., when you 'ls' in Linux/Max or 'dir' in Windows you should see:
+
+-rw-r--r--  1 acnash  staff  118300 23 Jul 20:25 ForceConstants.jar
+drwxr-xr-x  5 acnash  staff     170 23 Jul 20:25 lib
+
+4) Download the following Java packages (.jar files) and place them inside the lib directory.
+ 
+Jama-1.0.3.jar	
+commons-math3-3.5.jar
+
+NOTE: I suspect by now that there are newer version to each library, they have no been tested. ForceGen was build using the packaged versions as you see here. 
+
+5) Execute ForceGen either by double clicking ForceConstants.jar, for example, if you have it saved to your personal computer, or by typing 'java -jar ForceConstants.jar' at the command line.
+
+NOTE: ForceGen uses Swing GUI components. If you are executing the application via a secure connection to a server e.g., your institution/University cluster, then makes sure you have X11 active when you login. For example, through Linux/Mac this would be similar to:
+
+ssh -X username@server.ac.uk
+
+In Windows, there is an option within Putty to redirect X11 requests. Make sure that is selected else you will see nothing. 
+
+----------------------------------------------------------------------------------
+
+USAGE
+======
+ 
+ForceGen is very useful, but it is equally as strict. If you are automating the generation of force constants by supplying a list of user atom names the input file must be formatted correctly. I will build in some intelligence in later versions.
+
+Single force constant parameterisation use.
+1. Load a Gaussian .log/.out text file and a formatted Gaussian checkpoint file by selecting the respective file selection buttons towards the top of the application window. 
+
+2. To change between bond stretch and bond angle force constant derivation use the combobox to the left of the applicaiton window. 
+
+3. Enter the atom IDs as denoted in the Gaussian log file. A displaced atom during bond stretch force constant derivation is the atom which is displaced relative to a second atom which could be considered as fixed. The bond angle force constant derivation requires three atom IDs, two displaced atoms A and C (a combination of vibrations: scissoring and rocking), and a fixed atom B, to make the angle A-B-C. 
+
+4. Derive the force constant by clicking the 'Calculate' button.  The derived force constant will be reported in units compatible with the Amber MD code and the Gromacs MD code. The raw Hessian followed by the mass weighted Hessian are also visible in the output screen. 
+
+Multiple force constant parameterisation use through atom connectivity file description.
+
+An atom connectivity file provides an automated process of deriving multiple stretch or angle force constants at anyone time. It will also derive bond lengths and bond angles for Gromacs and bond lengths for Amber. These parameters are written to a single FC.dat file which can be used to populate frcmod.known and ffbonded.itp for Amber and Gromacs, respectively.  
+
+1. Prepare an ASCII text file (best through Vi or emacs to avoid hidden metadata). For the derivation of bond stretch force constants the first line should read Stretch, otherwise Angle. 
+
+2. Each additional line should only contain atom connectivity, avoid blank lines. For the software to retrieve the correct atom from the Gaussian files us the atom IDs to denote connectivity. For example over two individual files:  
+
+stretchfile.dat 
+Stretch 
+1 2
+2 3
+3 4
+10 11
+
+anglefile.dat 
+Angle
+1 2 3
+2 3 4
+3 4 5 
+
+3.Atom types if provided are used to match the Gromacs and Amber library file format. This will result in equlibrium bond stretch and bond angle calculation. Simply add the atom types in your input file.dat file after each row of respective atom IDs. 
+
+For example:  
+stretchfile.dat 
+
+Stretch 
+1 2 N CA 
+2 3 CA C 
+3 4 CA O  
+
+Note: All atom types must be supplied, or no types at all. If no types are supplied, the regular output of atom IDs and force constants are saved. Providing atom types will result in the following format for bond stretch:  
+GROMACS - atom types internal to Gromacs (supplied by user) i j func len_eq(nm) FC (kJ/mol/nm^2)  
+AMBER - atom types internal to Amber (supplied by user) BOND FC(kcal/mol/rad^2) len_eq(Angstrom)  
+
+And for bond angle for constants:  
+AMBER - atom types internal to Amber (supplied by user) ANGLE FC(kcal/mol/rad^2) deg_eq(degree)  
+GROMACS - atom types internal to Gromacs (supplied by user) i j k func deg_eq(degree) FC (kJ/mol/rad^2)  
+
+4. To derive the force constant from the input file, select the Atom Data button. Load the formatted .dat file. 
+
+5. The force constant output will be stored in a FC.dat file in the same directory as the atom connectivity input file. 
+
+WARNING - BEFORE USE
+====================
+
+1. This program currently over writes the FC.dat file.
+2. When preparing the user input file for Stretch or Angle do not combine them into one file. You will need to run the program once for a Stretch user input file and a second time for an Angle user input file.   
