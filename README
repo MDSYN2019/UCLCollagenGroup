@@ -1,6 +1,8 @@
 INSTALLATION
 =============
 
+## Making modifications - SYN ##
+
 1) You will need a copy of the Java Runtime Environment version 1.8+. The exact Java distribution version that ForceGen was generated using is build 1.8.0_60-b27.
 
 2) Download the executable ForceGen JAR from:
